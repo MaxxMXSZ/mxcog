@@ -1,4 +1,4 @@
-from .noimage import noimage
+from .onlyimage import onlyimage
 
 def setup(bot):
-    bot.add_cog(NoImageCog(bot))
+    bot.add_cog(onlyimage(bot))
