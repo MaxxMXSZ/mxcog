@@ -1,4 +1,4 @@
-from .onlyimage import onlyimage
+from .onlyimage import OnlyImageCog
 
 def setup(bot):
-    bot.add_cog(onlyimage(bot))
+    bot.add_cog(OnlyImageCog(bot))
