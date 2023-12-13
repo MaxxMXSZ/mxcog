@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-class NoImageCog(commands.Cog):
+class OnlyImageCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.allowed_extensions = {".png", ".jpg", ".jpeg", ".gif"}
@@ -11,12 +11,12 @@ class NoImageCog(commands.Cog):
         # Replace this with your own logic to check if a member is a moderator
         return any(role.name == 'Moderator' for role in member.roles)
 
-    @commands.command(name='noimage', aliases=['setimagechannel'])
+    @commands.command(name='onlyimage', aliases=['setimagechannel'])
     @commands.has_permissions(administrator=True)
     async def set_image_channel(self, ctx, channel: discord.TextChannel):
         """
         Set the channel where only images are allowed.
-        Usage: .noimage <channel_mention>
+        Usage: .onlyimage <channel_mention>
         """
         self.image_only_channel = channel.id
         await ctx.send(f"Only images are allowed in {channel.mention} now.")
@@ -45,4 +45,4 @@ class NoImageCog(commands.Cog):
                 await message.author.send("You can only post images in this channel.")
 
 def setup(bot):
-    bot.add_cog(NoImageCog(bot))
+    bot.add_cog(OnlyImageCog(bot))
