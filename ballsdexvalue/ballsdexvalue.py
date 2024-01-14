@@ -1,7 +1,9 @@
 from redbot.core import commands
 
 class BallsdexValue(commands.Cog):
-    def __init__(self, bot):
+    """Tool to calculate value of ballsdex balls roughly"""
+    
+    def __init__(self, bot: Red):
         self.bot = bot
 
     def clear(self):
