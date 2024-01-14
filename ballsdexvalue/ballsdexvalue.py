@@ -1,4 +1,4 @@
-from discord.ext import commands
+from redbot.core import commands
 
 class BallsdexValue(commands.Cog):
     def __init__(self, bot):
