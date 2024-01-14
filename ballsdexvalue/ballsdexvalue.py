@@ -1,8 +1,5 @@
 from discord.ext import commands
 
-import math
-
-
 class BallsdexValue(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -17,22 +14,22 @@ class BallsdexValue(commands.Cog):
 
     @commands.command(name="ballsdexvalue")
     async def balls_dex_value(self, ctx):
-        await self.bot.send("Enter rarity to calculate (If you want to see how many top ones you can get, put 1)")
-        raritycalc = int(await self.bot.wait_for("message", check=lambda msg: msg.author == self.bot.user).content)
+        await ctx.send("Enter rarity to calculate (If you want to see how many top ones you can get, put 1)")
+        raritycalc = int(await self.bot.wait_for("message", check=lambda msg: msg.author == ctx.author).content)
 
         self.clear()
 
-        await self.bot.send("Enter rarity")
-        rankstat = int(await self.bot.wait_for("message", check=lambda msg: msg.author == self.bot.user).content)
+        await ctx.send("Enter rarity")
+        rankstat = int(await self.bot.wait_for("message", check=lambda msg: msg.author == ctx.author).content)
 
         self.clear()
 
         if rankstat == 0:
-            await self.bot.send("You must enter a valid number.")
+            await ctx.send("You must enter a valid number.")
             return
 
-        await self.bot.send("Enter attack modifier (EX: +20%)")
-        attack_input = await self.bot.wait_for("message", check=lambda msg: msg.author == self.bot.user).content
+        await ctx.send("Enter attack modifier (EX: +20%)")
+        attack_input = await self.bot.wait_for("message", check=lambda msg: msg.author == ctx.author).content
 
         attackstat = 0
 
@@ -43,8 +40,8 @@ class BallsdexValue(commands.Cog):
 
         self.clear()
 
-        await self.bot.send("Enter health modifier (EX: +20%)")
-        health_input = await self.bot.wait_for("message", check=lambda msg: msg.author == self.bot.user).content
+        await ctx.send("Enter health modifier (EX: +20%)")
+        health_input = await self.bot.wait_for("message", check=lambda msg: msg.author == ctx.author).content
 
         healthstat = 0
 
@@ -55,13 +52,13 @@ class BallsdexValue(commands.Cog):
 
         self.clear()
 
-        await self.bot.send("Enter shiny (true or false)")
-        ifshiny = (await self.bot.wait_for("message", check=lambda msg: msg.author == self.bot.user).content).lower() == "true"
+        await ctx.send("Enter shiny (true or false)")
+        ifshiny = (await self.bot.wait_for("message", check=lambda msg: msg.author == ctx.author).content).lower() == "true"
 
         self.clear()
 
-        await self.bot.send("Enter event. (coming soon, enter random integer)")
-        whichevent = int(await self.bot.wait_for("message", check=lambda msg: msg.author == self.bot.user).content)
+        await ctx.send("Enter event. (coming soon, enter random integer)")
+        whichevent = int(await self.bot.wait_for("message", check=lambda msg: msg.author == ctx.author).content)
 
         self.clear()
 
@@ -102,21 +99,21 @@ class BallsdexValue(commands.Cog):
         resultabove82 = round((finalvalabove8 / tx) * 10)
 
         if rankstat != 8 and rankstat != 1:
-            await self.bot.send(finalval / 10)
+            await ctx.send(finalval / 10)
         else:
-            await self.bot.send(finalvalabove8 / 10)
+            await ctx.send(finalvalabove8 / 10)
 
         if (raritycalc != 8 and raritycalc != 1) and ((rankstat != 8 and rankstat != 1)):
-            await self.bot.send(f"(a score of {tx / 10} is equal to 1 T{raritycalc} ball)")
-            await self.bot.send(f"this ball is worth about {resultabove8 / 10} T{raritycalc}'s")
+            await ctx.send(f"(a score of {tx / 10} is equal to 1 T{raritycalc} ball)")
+            await ctx.send(f"this ball is worth about {resultabove8 / 10} T{raritycalc}'s")
         elif (raritycalc != 8 and raritycalc != 1) and ((rankstat == 8 or rankstat == 1)):
-            await self.bot.send(f"(a score of {tx / 10} is equal to 1 T{raritycalc} ball)")
-            await self.bot.send(f"this ball is worth about {resultabove82 / 10} T{raritycalc}'s")
+            await ctx.send(f"(a score of {tx / 10} is equal to 1 T{raritycalc} ball)")
+            await ctx.send(f"this ball is worth about {resultabove82 / 10} T{raritycalc}'s")
         elif rankstat != 8 and rankstat != 1:
-            await self.bot.send(f"(a score of {txabove8 / 10} is equal to 1 T{raritycalc} ball)")
-            await self.bot.send(f"this ball is worth about {result2 / 10} T{raritycalc}'s")
+            await ctx.send(f"(a score of {txabove8 / 10} is equal to 1 T{raritycalc} ball)")
+            await ctx.send(f"this ball is worth about {result2 / 10} T{raritycalc}'s")
         else:
-            await self.bot.send(f"(a score of {txabove8 / 10} is equal to 1 T{raritycalc} ball)")
-            await self.bot.send(f"this ball is worth about {result / 10} T{raritycalc}'s")
+            await ctx.send(f"(a score of {txabove8 / 10} is equal to 1 T{raritycalc} ball)")
+            await ctx.send(f"this ball is worth about {result / 10} T{raritycalc}'s")
 
-        await self.bot.send("Keep in mind that this calculator is still under development. Calculations are likely to be off just a little bit.")
+        await ctx.send("Keep in mind that this calculator is still under development. Calculations are likely to be off just a little bit.")
