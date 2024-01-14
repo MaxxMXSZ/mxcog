@@ -1,5 +1,8 @@
 from discord.ext import commands
 
+import math
+
+
 class BallsdexValue(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
