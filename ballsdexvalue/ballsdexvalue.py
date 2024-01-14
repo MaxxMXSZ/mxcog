@@ -118,6 +118,3 @@ class BallsdexValue(commands.Cog):
             print(f"this ball is worth about {result / 10} T{raritycalc}'s")
 
         print("Keep in mind that this calculator is still under development. Calculations are likely to be off just a little bit.")
-
-def setup(bot):
-    bot.add_cog(BallsdexValue(bot))
