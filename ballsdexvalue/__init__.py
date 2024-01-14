@@ -2,6 +2,6 @@ from redbot.core import bot
 
 from .ballsdexvalue import BallsdexValue
 
-def setup(bot: bot.Red):
-    cog = BallsdexValue(bot)
-    bot.add_cog(cog)
+async def setup(bot: Red) -> None:
+    cog = CodeSnippets(bot)
+    await bot.add_cog(cog)
