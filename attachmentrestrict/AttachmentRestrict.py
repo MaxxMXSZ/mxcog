@@ -15,14 +15,6 @@ class AttachmentRestrict(commands.Cog):
     @commands.group(aliases=["attachrestrict"], invoke_without_command=True)
     async def attachmentrestrict(self, ctx):
         """Manage attachment restrictions for new members."""
-        embed = discord.Embed(title="Attachment Restrict Commands", color=discord.Color.blue())
-        embed.add_field(name=".attachmentrestrict enable <true/false>", value="Enable or disable the restriction.", inline=False)
-        embed.add_field(name=".attachmentrestrict settime <time>", value="Set how long new members must wait (e.g., 3d, 2h, 1m, 30s).", inline=False)
-        embed.add_field(name=".attachmentrestrict ignore channel <#channel>", value="Ignore a specific channel.", inline=False)
-        embed.add_field(name=".attachmentrestrict ignore role <@role>", value="Ignore a specific role.", inline=False)
-        embed.add_field(name=".attachmentrestrict unignore channel <#channel>", value="Remove a channel from the ignore list.", inline=False)
-        embed.add_field(name=".attachmentrestrict unignore role <@role>", value="Remove a role from the ignore list.", inline=False)
-        await ctx.send(embed=embed)
     
     @attachmentrestrict.command()
     async def enable(self, ctx, state: bool):
