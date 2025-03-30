@@ -1,0 +1,17 @@
+{
+    "author": [
+        "Mxlodix"
+    ],
+    "install_msg": "Set period of time til new member can post an attachment",
+    "name": "AttachmentRestrict",
+    "disabled": false,
+    "short": "Set period of time til new member can post an attachment",
+    "description": "Set period of time til new member can post an attachment",
+    "tags": [
+        "security",
+        "timer",
+        "attachment",
+    ],
+    "min_bot_version": "3.5.0",
+    "hidden": false
+}
