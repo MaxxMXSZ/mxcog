@@ -12,7 +12,7 @@ class AttachmentRestrict(commands.Cog):
     
     @commands.guild_only()
     @commands.admin()
-    @commands.group(aliases=["attachrestrict"], invoke_without_command=True)
+    @commands.group(aliases=["attachrestrict"], invoke_without_command=False)
     async def attachmentrestrict(self, ctx):
         """Manage attachment restrictions for new members."""
     
