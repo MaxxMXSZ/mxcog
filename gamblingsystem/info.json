@@ -1,0 +1,17 @@
+{
+    "author": [
+        "Mxlodix"
+    ],
+    "install_msg": "Gamble Generational wealth",
+    "name": "GamblingSystem",
+    "disabled": false,
+    "short": "Gamble Generational wealth",
+    "description": "Gamble Generational wealth",
+    "tags": [
+        "game",
+        "addiction",
+        "gambling",
+    ],
+    "min_bot_version": "3.5.0",
+    "hidden": false
+}
