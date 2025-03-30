@@ -1,44 +1,57 @@
 from redbot.core import commands, Config, checks
 import discord
 from datetime import datetime, timedelta
+import re
 
 class AttachmentRestrict(commands.Cog):
     """Restricts new members from posting attachments for a set period."""
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890)
-        self.config.register_guild(enabled=False, wait_days=3, ignored_channels=[])
+        self.config.register_guild(enabled=False, wait_time="3d", ignored_channels=[], ignored_roles=[])
     
     @commands.guild_only()
     @commands.admin()
-    @commands.group()
-    async def attachrestrict(self, ctx):
+    @commands.group(aliases=["attachrestrict"], invoke_without_command=True)
+    async def attachmentrestrict(self, ctx):
         """Manage attachment restrictions for new members."""
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help()
+        embed = discord.Embed(title="Attachment Restrict Commands", color=discord.Color.blue())
+        embed.add_field(name=".attachmentrestrict enable <true/false>", value="Enable or disable the restriction.", inline=False)
+        embed.add_field(name=".attachmentrestrict settime <time>", value="Set how long new members must wait (e.g., 3d, 2h, 1m, 30s).", inline=False)
+        embed.add_field(name=".attachmentrestrict ignore channel <#channel>", value="Ignore a specific channel.", inline=False)
+        embed.add_field(name=".attachmentrestrict ignore role <@role>", value="Ignore a specific role.", inline=False)
+        embed.add_field(name=".attachmentrestrict unignore channel <#channel>", value="Remove a channel from the ignore list.", inline=False)
+        embed.add_field(name=".attachmentrestrict unignore role <@role>", value="Remove a role from the ignore list.", inline=False)
+        await ctx.send(embed=embed)
     
-    @attachrestrict.command()
-    async def enable(self, ctx):
-        """Enable attachment restrictions."""
-        await self.config.guild(ctx.guild).enabled.set(True)
-        await ctx.send("Attachment restrictions enabled.")
+    @attachmentrestrict.command()
+    async def enable(self, ctx, state: bool):
+        """Enable or disable attachment restrictions."""
+        await self.config.guild(ctx.guild).enabled.set(state)
+        status = "enabled" if state else "disabled"
+        await ctx.send(f"Attachment restrictions {status}.")
     
-    @attachrestrict.command()
-    async def disable(self, ctx):
-        """Disable attachment restrictions."""
-        await self.config.guild(ctx.guild).enabled.set(False)
-        await ctx.send("Attachment restrictions disabled.")
+    @attachmentrestrict.command()
+    async def settime(self, ctx, time: str = None):
+        """Set how long new members must wait before posting attachments."""
+        if not time:
+            await ctx.send("Usage: `.attachmentrestrict settime <time>`\nExample: `.attachmentrestrict settime 3d` (3 days), `.attachmentrestrict settime 2h` (2 hours)")
+            return
+        
+        if not re.match(r"^\d+[dhms]$", time):
+            await ctx.send("Invalid format. Use `<number><d/h/m/s>` (e.g., `3d`, `2h`, `1m`, `30s`).")
+            return
+        
+        await self.config.guild(ctx.guild).wait_time.set(time)
+        await ctx.send(f"New members must wait `{time}` before posting attachments.")
     
-    @attachrestrict.command()
-    async def setdays(self, ctx, days: int):
-        """Set the number of days a user must wait before posting attachments."""
-        if days < 0:
-            return await ctx.send("Number of days must be at least 0.")
-        await self.config.guild(ctx.guild).wait_days.set(days)
-        await ctx.send(f"New members must wait {days} day(s) before posting attachments.")
+    @attachmentrestrict.group(invoke_without_command=True)
+    async def ignore(self, ctx):
+        """Ignore a channel or role from attachment restrictions."""
+        await ctx.send("Usage: `.attachmentrestrict ignore channel <#channel>` or `.attachmentrestrict ignore role <@role>`.")
     
-    @attachrestrict.command()
-    async def ignore(self, ctx, channel: discord.TextChannel):
+    @ignore.command(name="channel")
+    async def ignore_channel(self, ctx, channel: discord.TextChannel):
         """Ignore a channel from attachment restrictions."""
         async with self.config.guild(ctx.guild).ignored_channels() as ignored:
             if channel.id not in ignored:
@@ -47,8 +60,23 @@ class AttachmentRestrict(commands.Cog):
             else:
                 await ctx.send("This channel is already ignored.")
     
-    @attachrestrict.command()
-    async def unignore(self, ctx, channel: discord.TextChannel):
+    @ignore.command(name="role")
+    async def ignore_role(self, ctx, role: discord.Role):
+        """Ignore a role from attachment restrictions."""
+        async with self.config.guild(ctx.guild).ignored_roles() as ignored:
+            if role.id not in ignored:
+                ignored.append(role.id)
+                await ctx.send(f"{role.mention} will be ignored.")
+            else:
+                await ctx.send("This role is already ignored.")
+    
+    @attachmentrestrict.group(invoke_without_command=True)
+    async def unignore(self, ctx):
+        """Remove a channel or role from the ignore list."""
+        await ctx.send("Usage: `.attachmentrestrict unignore channel <#channel>` or `.attachmentrestrict unignore role <@role>`.")
+    
+    @unignore.command(name="channel")
+    async def unignore_channel(self, ctx, channel: discord.TextChannel):
         """Remove a channel from the ignore list."""
         async with self.config.guild(ctx.guild).ignored_channels() as ignored:
             if channel.id in ignored:
@@ -56,6 +84,16 @@ class AttachmentRestrict(commands.Cog):
                 await ctx.send(f"{channel.mention} is no longer ignored.")
             else:
                 await ctx.send("This channel was not ignored.")
+    
+    @unignore.command(name="role")
+    async def unignore_role(self, ctx, role: discord.Role):
+        """Remove a role from the ignore list."""
+        async with self.config.guild(ctx.guild).ignored_roles() as ignored:
+            if role.id in ignored:
+                ignored.remove(role.id)
+                await ctx.send(f"{role.mention} is no longer ignored.")
+            else:
+                await ctx.send("This role was not ignored.")
     
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -68,10 +106,16 @@ class AttachmentRestrict(commands.Cog):
         if not config["enabled"]:
             return
         
-        if message.channel.id in config["ignored_channels"]:
+        if message.channel.id in config["ignored_channels"] or any(role.id in config["ignored_roles"] for role in message.author.roles):
             return
         
-        account_age = (datetime.utcnow() - message.author.created_at).days
-        if account_age < config["wait_days"] and message.attachments:
+        account_age = (datetime.utcnow() - message.author.created_at).total_seconds()
+        wait_time = self.parse_time(config["wait_time"])
+        
+        if account_age < wait_time and message.attachments:
             await message.delete()
-            await message.channel.send(f"{message.author.mention}, you must wait {config['wait_days']} day(s) before posting attachments.", delete_after=5)
+            await message.channel.send(f"{message.author.mention}, you must wait `{config['wait_time']}` before posting attachments.", delete_after=5)
+    
+    def parse_time(self, time_str):
+        unit_multipliers = {"d": 86400, "h": 3600, "m": 60, "s": 1}
+        return int(time_str[:-1]) * unit_multipliers[time_str[-1]]
