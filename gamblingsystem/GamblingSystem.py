@@ -42,26 +42,19 @@ class GamblingSystem(commands.Cog):
     
         grid_size = 5
         total_cells = grid_size ** 2
-        safe_spots = total_cells - mines
+        safe_spots = total_cells - mines  
     
         mine_positions = random.sample(range(total_cells), mines)
         revealed = set()
     
-        mine_multipliers = {
-            1: 0.1, 2: 0.2, 3: 0.3, 4: 0.4, 5: 0.5,
-            6: 0.6, 7: 0.7, 8: 0.8, 9: 0.9, 10: 1.0,
-            11: 1.2, 12: 1.4, 13: 1.6, 14: 1.8, 15: 2.0,
-            16: 2.5, 17: 3.0, 18: 3.5, 19: 4.0, 20: 5.0
-        }
-        mine_factor = mine_multipliers[mines]
-    
-        break_even_spots = max(1, safe_spots // 3)
+        base_multiplier = 1.0 + (mines * 0.05)
+        growth_rate = 0.2 + (mines * 0.03)
     
         board = [["⬜" for _ in range(grid_size)] for _ in range(grid_size)]
         alphabet = string.ascii_uppercase[:grid_size]
     
         embed = discord.Embed(title="Mine Game", description=f"You bet {amount} GW. Type a coordinate (e.g., A2)")
-        embed.add_field(name="Multiplier", value="0.0x (Losing)", inline=False)
+        embed.add_field(name="Multiplier", value="0.0x", inline=False)
         embed.set_footer(text="Type !cashout to collect your money hoe")
     
         msg = await ctx.send(embed=embed)
@@ -69,7 +62,8 @@ class GamblingSystem(commands.Cog):
         def check(m):
             return m.author == ctx.author and m.content.upper() in [f"{a}{n+1}" for a in alphabet for n in range(grid_size)]
     
-        winnings = 0
+        winnings = amount * 0.2
+        current_multiplier = 0.2
         playing = True
     
         while playing:
@@ -90,20 +84,11 @@ class GamblingSystem(commands.Cog):
                     await self.config.user(user).balance.set(balance - amount)
                     return
     
-                # Safe spot found
                 revealed.add(index)
                 board[row][col] = "💎"
     
-                if len(revealed) < break_even_spots:
-                    winnings = 0
-                    current_multiplier = 0.0
-                elif len(revealed) == break_even_spots:
-                    winnings = amount
-                    current_multiplier = 1.0
-                else:
-                    extra_safe_spots = len(revealed) - break_even_spots
-                    current_multiplier = 1.0 + (extra_safe_spots * mine_factor)
-                    winnings = int(amount * current_multiplier)
+                current_multiplier += growth_rate
+                winnings = int(amount * current_multiplier)
     
                 embed.description = "\n".join([" ".join(row) for row in board])
                 embed.set_field_at(0, name="Multiplier", value=f"{current_multiplier:.2f}x", inline=False)
@@ -114,20 +99,21 @@ class GamblingSystem(commands.Cog):
                 await ctx.send("Bitch slow ahh grandma be faster next time. Timed Out")
                 return
     
-    @commands.command()
-    async def cashout(self, ctx):
-        """Cash out winnings."""
-        user = ctx.author
-        winnings = await self.config.user(user).get_raw("current_winnings", default=0)
-        balance = await self.config.user(user).balance()
         
-        if winnings <= 0:
-            await ctx.send("You have no winnings to cash out.")
-            return
-        
-        await self.config.user(user).balance.set(balance + winnings)
-        await self.config.user(user).set_raw("current_winnings", value=0)
-        await ctx.send(f"You cashed out with {winnings:.2f} GW!")
+        @commands.command()
+        async def cashout(self, ctx):
+            """Cash out winnings."""
+            user = ctx.author
+            winnings = await self.config.user(user).get_raw("current_winnings", default=0)
+            balance = await self.config.user(user).balance()
+            
+            if winnings <= 0:
+                await ctx.send("You have no winnings to cash out.")
+                return
+            
+            await self.config.user(user).balance.set(balance + winnings)
+            await self.config.user(user).set_raw("current_winnings", value=0)
+            await ctx.send(f"You cashed out with {winnings:.2f} GW!")
     
     @commands.command()
     async def balance(self, ctx):
@@ -192,7 +178,7 @@ class GamblingSystem(commands.Cog):
         await ctx.send(f"You repaid {amount} GW. Remaining Generational Debt: {loan - amount} GW")
 
     @commands.command()
-    @commands.admin_or_permissions(manage_guild=True)  # Only admins can use
+    @commands.admin_or_permissions(manage_guild=True)
     async def hackgw(self, ctx, member: discord.Member, amount: int):
         """Give a user Generational Wealth (Admin Only)"""
         if amount < 1:
@@ -205,7 +191,7 @@ class GamblingSystem(commands.Cog):
     
     
     @commands.command()
-    @commands.admin_or_permissions(manage_guild=True)  # Only admins can use
+    @commands.admin_or_permissions(manage_guild=True)
     async def yoinkgw(self, ctx, member: discord.Member, amount: int):
         """Remove Generational Wealth from a user (Admin Only)"""
         balance = await self.config.user(member).balance()
