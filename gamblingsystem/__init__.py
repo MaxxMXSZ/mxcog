@@ -1,4 +1,4 @@
-from .gamblingsystem import GamblingSystem
+from .gamblingsystem import GamblingSystem.py
 
 
 async def setup(bot):
