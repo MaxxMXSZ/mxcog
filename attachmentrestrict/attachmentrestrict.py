@@ -75,6 +75,3 @@ class AttachmentRestrict(commands.Cog):
         if account_age < config["wait_days"] and message.attachments:
             await message.delete()
             await message.channel.send(f"{message.author.mention}, you must wait {config['wait_days']} day(s) before posting attachments.", delete_after=5)
-
-async def setup(bot):
-    bot.add_cog(AttachmentRestrict(bot))
