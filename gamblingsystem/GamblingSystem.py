@@ -191,3 +191,33 @@ class GamblingSystem(commands.Cog):
         await self.config.user(user).loan.set(loan - amount)
         await ctx.send(f"You repaid {amount} GW. Remaining Generational Debt: {loan - amount} GW")
 
+    @commands.command()
+    @commands.admin_or_permissions(manage_guild=True)  # Only admins can use
+    async def hackgw(self, ctx, member: discord.Member, amount: int):
+        """Give a user Generational Wealth (Admin Only)"""
+        if amount < 1:
+            await ctx.send("Bitch you can't hack negative GW.")
+            return
+        
+        new_balance = await self.config.user(member).balance() + amount
+        await self.config.user(member).balance.set(new_balance)
+        await ctx.send(f"🔥 {ctx.author.mention} just hacked {amount} GW to {member.mention}! 💰")
+    
+    
+    @commands.command()
+    @commands.admin_or_permissions(manage_guild=True)  # Only admins can use
+    async def yoinkgw(self, ctx, member: discord.Member, amount: int):
+        """Remove Generational Wealth from a user (Admin Only)"""
+        balance = await self.config.user(member).balance()
+    
+        if amount < 1:
+            await ctx.send("Bitch you can't yoink negative GW.")
+            return
+        if amount > balance:
+            await ctx.send(f"{member.mention} is already broke. Can't yoink more than what they got.")
+            return
+    
+        new_balance = balance - amount
+        await self.config.user(member).balance.set(new_balance)
+        await ctx.send(f"🚨 {ctx.author.mention} just yoinked {amount} GW from {member.mention}! 💸")
+
