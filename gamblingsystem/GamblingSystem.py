@@ -4,7 +4,7 @@ import random
 import string
 import time
 
-class gamblingsystem(commands.Cog):
+class GamblingSystem(commands.Cog):
     """A gambling cog by ze Mx."""
 
     def __init__(self, bot):
